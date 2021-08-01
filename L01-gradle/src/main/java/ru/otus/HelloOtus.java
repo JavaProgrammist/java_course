@@ -12,5 +12,6 @@ public class HelloOtus {
         List<String> values = Lists.newArrayList("a", null, "b", "c");
         Iterable<String> withoutNulls = Iterables.filter(values, Predicates.notNull());
         withoutNulls.forEach(System.out::println);
+
     }
 }
