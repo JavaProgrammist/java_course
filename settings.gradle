@@ -1,3 +1,4 @@
 rootProject.name = 'java_course'
 include 'L01-gradle'
+include 'L04-generics'
 
