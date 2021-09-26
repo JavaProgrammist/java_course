@@ -19,13 +19,14 @@ public class StartPoint {
         bankNotes.add(new OneTypeBankNotes(20, 12));
         bankNotes.add(new OneTypeBankNotes(50, 6));
         bankNotes.add(new OneTypeBankNotes(100, 5));
+        bankNotes.add(new OneTypeBankNotes(3, 1));
 
         atm.putBankNotes(bankNotes);
         List<OneTypeBankNotes> withdrawnBankNotes = atm.withdrawBankNotes(348)
                 .stream().sorted(getOneTypeBankNotesComparatorByNominalDesc()).collect(Collectors.toList());
         for (OneTypeBankNotes item : withdrawnBankNotes) {
-            System.out.printf("Было снято %d банкнот номиналом %d%n", item.getMoneyAmount(),
-                    item.getNominal());
+            System.out.println(String.format("Было снято %d банкнот номиналом %d", item.getMoneyAmount(),
+                    item.getDenomination()));
         }
         System.out.println(atm.getMoneyAmount());
 
@@ -35,11 +36,11 @@ public class StartPoint {
         atm.putBankNotes(bankNotes);
         System.out.println(atm.getMoneyAmount());
 
-        atm.withdrawBankNotes(5000);
-        System.out.println(atm.getMoneyAmount());
+        //atm.withdrawBankNotes(5000);
+        //System.out.println(atm.getMoneyAmount());
     }
 
     private static Comparator<OneTypeBankNotes> getOneTypeBankNotesComparatorByNominalDesc() {
-        return (item1, item2) -> item2.getNominal() - item1.getNominal();
+        return (item1, item2) -> item2.getDenomination() - item1.getDenomination();
     }
 }

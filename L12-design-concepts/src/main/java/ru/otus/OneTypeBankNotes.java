@@ -1,21 +1,33 @@
 package ru.otus;
 
+import lombok.Data;
+
+/**
+ * Банкноты одного номинала.
+ */
+@Data
 public class OneTypeBankNotes {
 
-    private int nominal;
+    /**
+     * Номинал.
+     */
+    private int denomination;
 
+    /**
+     * Количество банкнот.
+     */
     private int number;
 
-    public OneTypeBankNotes(int nominal, int number) {
-        if (nominal <= 0)
-            throw new RuntimeException("Номинал не может быть меньше нуля");
+    public OneTypeBankNotes(int denomination, int number) {
+        if (denomination <= 0)
+            throw new RuntimeException("Denomination of bank note cannot be less than 0");
 
-        this.nominal = nominal;
+        this.denomination = denomination;
         this.number = number;
     }
 
-    public int getNominal() {
-        return nominal;
+    public int getDenomination() {
+        return denomination;
     }
 
     public int getNumber() {
@@ -27,12 +39,23 @@ public class OneTypeBankNotes {
     }
 
     public void addNumber(int number) {
+        if (number < 0)
+            throw new RuntimeException("Count of added money is less than 0");
         this.number += number;
-        if (number > 0)
-            throw new RuntimeException("Номинал не может быть меньше нуля");
     }
 
+    public void subtractNumber(int number) {
+        if (number < 0)
+            throw new RuntimeException("Count of subtracted money is less than 0");
+        if (this.number - number < 0)
+            throw new RuntimeException("Remainder cannot be less than 0");
+        this.number -= number;
+    }
+
+    /**
+     * Возвращает общее количество денег, которые составляют банкноты.
+     */
     public long getMoneyAmount() {
-        return (long) nominal * number;
+        return (long) denomination * number;
     }
 }

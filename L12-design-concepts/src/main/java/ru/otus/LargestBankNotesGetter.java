@@ -5,6 +5,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
+/**
+ * Определяет номинал и количество банкнот, которые должны быть использованы для выдачи терминалом с таким учетом,
+ * чтобы как можно меньше было самих банкнот.
+ */
 public class LargestBankNotesGetter implements BankNotesGetter {
     @Override
     public Optional<List<OneTypeBankNotes>> getBankNotesWithTotalAmount(List<OneTypeBankNotes> availableBankNotes,
@@ -13,7 +17,7 @@ public class LargestBankNotesGetter implements BankNotesGetter {
 
         AtomicReference<BankNotes> bankNotes = new AtomicReference<>();
         availableBankNotes.stream()
-                .sorted(Comparator.comparingInt(OneTypeBankNotes::getNominal))
+                .sorted(Comparator.comparingInt(OneTypeBankNotes::getDenomination))
                 .forEach(item-> {
                     if (bankNotes.get() == null)
                         bankNotes.set(new BankNotes(item));

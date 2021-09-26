@@ -4,36 +4,40 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Банкомат.
+ */
 public class Atm {
 
+    //Имеющиеся монеты разных номиналов.
     private List<OneTypeBankNotes> bankNotes = new ArrayList<>();
+
     private BankNotesGetter bankNotesGetter;
 
     public Atm(BankNotesGetter bankNotesGetter) {
         this.bankNotesGetter = bankNotesGetter;
     }
 
-
-    public synchronized void putBankNotes(List<OneTypeBankNotes> bankNotes) {
-        for (OneTypeBankNotes newBankNotes : bankNotes) {
-            Optional<OneTypeBankNotes> existBankNotesOpt = bankNotes.stream()
-                    .filter(item -> item.getNominal() == newBankNotes.getNominal())
+    public synchronized void putBankNotes(List<OneTypeBankNotes> bankNotesList) {
+        for (OneTypeBankNotes newBankNotes : bankNotesList) {
+            Optional<OneTypeBankNotes> existBankNotesOpt = this.bankNotes.stream()
+                    .filter(item -> item.getDenomination() == newBankNotes.getDenomination())
                     .findFirst();
             if (existBankNotesOpt.isPresent())
                 existBankNotesOpt.get().addNumber(newBankNotes.getNumber());
-            else bankNotes.add(newBankNotes);
+            else this.bankNotes.add(newBankNotes);
         }
     }
 
     public synchronized List<OneTypeBankNotes> withdrawBankNotes(int moneyAmount) {
         List<OneTypeBankNotes> withdrawnBankNotes = bankNotesGetter.getBankNotesWithTotalAmount(bankNotes, moneyAmount)
-                .orElseThrow(() -> new RuntimeException("Недостаточно денег или нет подходящих банкнот в банкомате"));
+                .orElseThrow(() -> new RuntimeException("Not enough money or no suitable banknotes at the ATM"));
         for (OneTypeBankNotes withdrawnOneTypeBankNotes : withdrawnBankNotes) {
             OneTypeBankNotes existOneTypeBankNotes = bankNotes.stream()
-                    .filter(item -> item.getNominal() == withdrawnOneTypeBankNotes.getNominal())
-                    .findFirst().orElseThrow(() -> new RuntimeException("Не найдена банкнота " +
-                    "номиналом " + withdrawnOneTypeBankNotes.getNominal()));
-            existOneTypeBankNotes.addNumber(Math.negateExact(withdrawnOneTypeBankNotes.getNumber()));
+                    .filter(item -> item.getDenomination() == withdrawnOneTypeBankNotes.getDenomination())
+                    .findFirst().orElseThrow(() -> new RuntimeException("No bank note of denomination " +
+                    withdrawnOneTypeBankNotes.getDenomination() + " was found"));
+            existOneTypeBankNotes.subtractNumber(withdrawnOneTypeBankNotes.getNumber());
             if (existOneTypeBankNotes.getNumber() == 0)
                 bankNotes.remove(existOneTypeBankNotes);
         }
