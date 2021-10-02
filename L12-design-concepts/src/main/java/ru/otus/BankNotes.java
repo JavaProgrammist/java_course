@@ -40,9 +40,9 @@ public class BankNotes {
      * @param moneyAmount сумма денег
      */
     public Optional<List<OneTypeBankNotes>> get(long moneyAmount) {
-        int requiredMaxOneTypeBankNoteCount = (int) (moneyAmount / oneTypeBankNotes.getDenomination());
+        int requiredMaxOneTypeBankNoteCount = (int) (moneyAmount / oneTypeBankNotes.getDenominationVal());
         if (oneTypeBankNotes.getNumber() >= requiredMaxOneTypeBankNoteCount &&
-                (long) oneTypeBankNotes.getDenomination() * requiredMaxOneTypeBankNoteCount == moneyAmount) {
+                (long) oneTypeBankNotes.getDenominationVal() * requiredMaxOneTypeBankNoteCount == moneyAmount) {
             List<OneTypeBankNotes> result = new ArrayList<>();
             result.add(new OneTypeBankNotes(oneTypeBankNotes.getDenomination(), requiredMaxOneTypeBankNoteCount));
             return Optional.of(result);
@@ -50,11 +50,12 @@ public class BankNotes {
         if (otherBankNotes != null) {
             for (int i = requiredMaxOneTypeBankNoteCount; i >= 0; i--) {
                 Optional<List<OneTypeBankNotes>> otherOneTypeBankNotesOpt = otherBankNotes.get(moneyAmount -
-                        (long) i * oneTypeBankNotes.getDenomination());
+                        (long) i * oneTypeBankNotes.getDenominationVal());
                 if (otherOneTypeBankNotesOpt.isPresent()) {
                     List<OneTypeBankNotes> result = otherOneTypeBankNotesOpt.get();
-                    if (i > 0)
+                    if (i > 0) {
                         result.add(new OneTypeBankNotes(oneTypeBankNotes.getDenomination(), i));
+                    }
                     return Optional.of(result);
                 }
             }

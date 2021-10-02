@@ -1,6 +1,8 @@
 package ru.otus;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -13,6 +15,6 @@ public interface BankNotesGetter {
      * @param availableBankNotes доступные банкноты
      * @param moneyAmount общее сумма денег, требуемая к выдаче
      */
-    Optional<List<OneTypeBankNotes>> getBankNotesWithTotalAmount(List<OneTypeBankNotes> availableBankNotes,
+    Optional<List<OneTypeBankNotes>> getBankNotesWithTotalAmount(Collection<OneTypeBankNotes> availableBankNotes,
                                                                  long moneyAmount);
 }

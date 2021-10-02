@@ -11,23 +11,27 @@ public class OneTypeBankNotes {
     /**
      * Номинал.
      */
-    private int denomination;
+    private Denomination denomination;
 
     /**
      * Количество банкнот.
      */
     private int number;
 
-    public OneTypeBankNotes(int denomination, int number) {
-        if (denomination <= 0)
+    public OneTypeBankNotes(Denomination denomination, int number) {
+        if (denomination.getValue() <= 0)
             throw new RuntimeException("Denomination of bank note cannot be less than 0");
 
         this.denomination = denomination;
         this.number = number;
     }
 
-    public int getDenomination() {
+    public Denomination getDenomination() {
         return denomination;
+    }
+
+    public int getDenominationVal(){
+        return denomination.getValue();
     }
 
     public int getNumber() {
@@ -56,6 +60,6 @@ public class OneTypeBankNotes {
      * Возвращает общее количество денег, которые составляют банкноты.
      */
     public long getMoneyAmount() {
-        return (long) denomination * number;
+        return (long) denomination.getValue() * number;
     }
 }
