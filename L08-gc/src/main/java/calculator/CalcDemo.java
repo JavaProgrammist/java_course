@@ -11,7 +11,6 @@ package calculator;
 */
 
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 
 public class CalcDemo {
