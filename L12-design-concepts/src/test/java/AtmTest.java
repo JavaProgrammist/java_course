@@ -1,3 +1,4 @@
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.otus.*;
 
@@ -12,6 +13,16 @@ public class AtmTest {
 
     private static Comparator<OneTypeBankNotes> getOneTypeBankNotesComparatorByNominalDesc() {
         return Comparator.comparingInt(OneTypeBankNotes::getDenominationVal).reversed();
+    }
+
+    @BeforeEach
+    public void before1() {
+        System.out.println("before1");
+    }
+
+    @BeforeEach
+    public void before2() {
+        System.out.println("before1");
     }
 
     @Test
