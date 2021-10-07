@@ -6,7 +6,7 @@ plugins {
     id 'com.github.johnrengelman.shadow'
 }
 
-mainClassName = 'ru.ru.otus.HelloOtus'
+mainClassName = 'ru.otus.HelloOtus'
 
 sourceCompatibility = JavaVersion.VERSION_15
 targetCompatibility = JavaVersion.VERSION_15
