@@ -6,7 +6,7 @@ plugins {
     id 'com.github.johnrengelman.shadow'
 }
 
-mainClassName = 'ru.otus.HelloOtus'
+mainClassName = 'ru.ru.otus.HelloOtus'
 
 sourceCompatibility = JavaVersion.VERSION_15
 targetCompatibility = JavaVersion.VERSION_15
@@ -21,7 +21,7 @@ shadowJar {
     archiveVersion.set('0.1')
     archiveClassifier.set('')
     manifest {
-        attributes 'Main-Class': 'ru.otus.HelloOtus'
+        attributes 'Main-Class': 'ru.ru.otus.HelloOtus'
     }
 }
 
