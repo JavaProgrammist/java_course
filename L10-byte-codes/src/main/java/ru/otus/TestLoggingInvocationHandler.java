@@ -1,22 +1,25 @@
 package ru.otus;
 
-import lombok.AllArgsConstructor;
-
 import java.lang.reflect.Method;
-import java.util.Optional;
+import java.util.Arrays;
+import java.util.Set;
+import java.util.stream.Collectors;
 
-@AllArgsConstructor
 public class TestLoggingInvocationHandler implements java.lang.reflect.InvocationHandler {
 
     private TestLogging testLogging;
+    private Set<Method> methodsWithLog;
+
+    public TestLoggingInvocationHandler(TestLogging testLogging) {
+        this.testLogging = testLogging;
+        methodsWithLog = Arrays.stream(testLogging.getClass().getDeclaredMethods())
+                .filter(item -> item.isAnnotationPresent(Log.class))
+                .collect(Collectors.toSet());
+    }
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        //1 вариант: указать аннотации в интерфейсе
-        if (method.isAnnotationPresent(Log.class)) {
-            logMethod(method, args);
-        //2 вариант: указать аннотации в классе, реализующем интерфейс
-        } else if (hasMethodImplLogAnnotation(method)) {
+        if (hasMethodImplLogAnnotation(method)) {
             logMethod(method, args);
         }
         return method.invoke(testLogging, args);
@@ -24,13 +27,9 @@ public class TestLoggingInvocationHandler implements java.lang.reflect.Invocatio
 
     //Возвращает признак того, что реализация метода интерфейса TestLogging имеет аннотацию Log.
     private boolean hasMethodImplLogAnnotation(Method interfaceMethod) {
-        try {
-            Method foundMethod = testLogging.getClass().getMethod(interfaceMethod.getName(),
-                    interfaceMethod.getParameterTypes());
-            return foundMethod.isAnnotationPresent(Log.class);
-        } catch (NoSuchMethodException e) {
-            return false;
-        }
+        return methodsWithLog.stream()
+                .anyMatch(item -> item.getName().equals(interfaceMethod.getName()) &&
+                        Arrays.equals(item.getParameterTypes(), interfaceMethod.getParameterTypes()));
     }
 
     //Производит запись в лог информации о методе.
