@@ -37,6 +37,23 @@ public class Message {
         this.field13 = field13;
     }
 
+    public Message(Message message) {
+        this.id = message.id;
+        this.field1 = message.field1;
+        this.field2 = message.field2;
+        this.field3 = message.field3;
+        this.field4 = message.field4;
+        this.field5 = message.field5;
+        this.field6 = message.field6;
+        this.field7 = message.field7;
+        this.field8 = message.field8;
+        this.field9 = message.field9;
+        this.field10 = message.field10;
+        this.field11 = message.field11;
+        this.field12 = message.field12;
+        this.field13 = new ObjectForMessage(message.field13);
+    }
+
     public long getId() {
         return id;
     }
@@ -127,6 +144,9 @@ public class Message {
                 ", field8='" + field8 + '\'' +
                 ", field9='" + field9 + '\'' +
                 ", field10='" + field10 + '\'' +
+                ", field11='" + field11 + '\'' +
+                ", field12='" + field12 + '\'' +
+                ", field13='" + field13 + '\'' +
                 '}';
     }
 
@@ -216,6 +236,21 @@ public class Message {
 
         public Builder field10(String field10) {
             this.field10 = field10;
+            return this;
+        }
+
+        public Builder field11(String field11) {
+            this.field11 = field11;
+            return this;
+        }
+
+        public Builder field12(String field12) {
+            this.field12 = field12;
+            return this;
+        }
+
+        public Builder field13(ObjectForMessage field13) {
+            this.field13 = field13;
             return this;
         }
 

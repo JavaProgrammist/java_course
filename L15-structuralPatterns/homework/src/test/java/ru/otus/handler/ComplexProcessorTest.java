@@ -1,12 +1,14 @@
 package ru.otus.handler;
 
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import ru.otus.model.InfoAboutExceptionInAction;
 import ru.otus.model.Message;
 import ru.otus.listener.Listener;
 import ru.otus.processor.Processor;
+import ru.otus.processor.ProcessorWithException;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -93,6 +95,36 @@ class ComplexProcessorTest {
 
         //then
         verify(listener, times(1)).onUpdated(message);
+    }
+
+    @Test
+    @DisplayName("Тестируем вызор процессора, бросающего исключение")
+    void handleProcessorWithExceptionTest() throws InterruptedException {
+        //Не совсем понял, как в этом тесте использовать паттерн Momento, ведь он предназначен для возможности отката
+        //изменений, но ведь в данном случае откат не требуется.
+        List<InfoAboutExceptionInAction> infoAboutExceptionList = new ArrayList<>();
+        var message = new Message.Builder(1).build();
+        var processor = new ProcessorWithException();
+
+        var endTime = LocalDateTime.now().plusSeconds(2);
+        while (!LocalDateTime.now().isAfter(endTime)) {
+            LocalDateTime processStartTime = LocalDateTime.now();
+            boolean isExceptionThrown = false;
+            try {
+                processor.process(message);
+            } catch (Exception e) {
+                isExceptionThrown = true;
+            }
+            InfoAboutExceptionInAction infoAboutException = new InfoAboutExceptionInAction(processStartTime,
+                    isExceptionThrown);
+            infoAboutExceptionList.add(infoAboutException);
+            Thread.sleep(500);
+        }
+
+        assertThat(infoAboutExceptionList)
+                .filteredOn(item -> !item.isExceptionThrown() && item.isActionStartSecondEven()).isEmpty();
+        assertThat(infoAboutExceptionList)
+                .filteredOn(item -> item.isExceptionThrown() && !item.isActionStartSecondEven()).isEmpty();
     }
 
     private static class TestException extends RuntimeException {
