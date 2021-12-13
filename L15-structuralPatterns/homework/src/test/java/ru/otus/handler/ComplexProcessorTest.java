@@ -1,10 +1,12 @@
 package ru.otus.handler;
 
+import org.assertj.core.api.Condition;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import ru.otus.model.InfoAboutExceptionInAction;
 import ru.otus.model.Message;
 import ru.otus.listener.Listener;
+import ru.otus.processor.DateTimeProvider;
 import ru.otus.processor.Processor;
 import ru.otus.processor.ProcessorWithException;
 
@@ -22,6 +24,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class ComplexProcessorTest {
+
+    private final static LocalDateTime TIME_WITH_EVEN_SECONDS = LocalDateTime.of(2021, 12, 13, 1, 1, 10);
+    private final static LocalDateTime TIME_WITH_ODD_SECONDS = LocalDateTime.of(2021, 12, 13, 1, 1, 11);
 
     @Test
     @DisplayName("Тестируем вызовы процессоров")
@@ -97,34 +102,29 @@ class ComplexProcessorTest {
         verify(listener, times(1)).onUpdated(message);
     }
 
+    private InfoAboutExceptionInAction processMessageByProcessorWithException(DateTimeProvider dateTimeProvider,
+                                                                              Message message) {
+        var processor = new ProcessorWithException(dateTimeProvider);
+        LocalDateTime processStartTime = dateTimeProvider.getDate();
+        boolean isExceptionThrown = false;
+        try {
+            processor.process(message);
+        } catch (Exception e) {
+            isExceptionThrown = true;
+        }
+        return new InfoAboutExceptionInAction(processStartTime, isExceptionThrown);
+    }
+
     @Test
     @DisplayName("Тестируем вызор процессора, бросающего исключение")
-    void handleProcessorWithExceptionTest() throws InterruptedException {
-        //Не совсем понял, как в этом тесте использовать паттерн Momento, ведь он предназначен для возможности отката
-        //изменений, но ведь в данном случае откат не требуется.
-        List<InfoAboutExceptionInAction> infoAboutExceptionList = new ArrayList<>();
+    void handleProcessorWithExceptionTest() {
         var message = new Message.Builder(1).build();
-        var processor = new ProcessorWithException();
-
-        var endTime = LocalDateTime.now().plusSeconds(2);
-        while (!LocalDateTime.now().isAfter(endTime)) {
-            LocalDateTime processStartTime = LocalDateTime.now();
-            boolean isExceptionThrown = false;
-            try {
-                processor.process(message);
-            } catch (Exception e) {
-                isExceptionThrown = true;
-            }
-            InfoAboutExceptionInAction infoAboutException = new InfoAboutExceptionInAction(processStartTime,
-                    isExceptionThrown);
-            infoAboutExceptionList.add(infoAboutException);
-            Thread.sleep(500);
-        }
-
-        assertThat(infoAboutExceptionList)
-                .filteredOn(item -> !item.isExceptionThrown() && item.isActionStartSecondEven()).isEmpty();
-        assertThat(infoAboutExceptionList)
-                .filteredOn(item -> item.isExceptionThrown() && !item.isActionStartSecondEven()).isEmpty();
+        InfoAboutExceptionInAction infoAboutExceptionInAction =
+                processMessageByProcessorWithException(() -> TIME_WITH_EVEN_SECONDS, message);
+        assertThat(infoAboutExceptionInAction).matches(InfoAboutExceptionInAction::isExceptionThrown);
+        infoAboutExceptionInAction =
+                processMessageByProcessorWithException(() -> TIME_WITH_ODD_SECONDS, message);
+        assertThat(infoAboutExceptionInAction).matches(item -> !item.isExceptionThrown());
     }
 
     private static class TestException extends RuntimeException {

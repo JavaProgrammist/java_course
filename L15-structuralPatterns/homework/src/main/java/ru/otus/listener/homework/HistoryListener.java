@@ -21,10 +21,6 @@ public class HistoryListener implements Listener, HistoryReader {
 
     @Override
     public Optional<Message> findMessageById(long id) {
-        if (history.containsKey(id)) {
-            return Optional.of(history.get(id));
-        } else {
-            return Optional.empty();
-        }
+        return Optional.ofNullable(history.get(id));
     }
 }
