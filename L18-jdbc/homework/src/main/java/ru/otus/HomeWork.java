@@ -13,6 +13,7 @@ import ru.otus.crm.service.DbServiceManagerImpl;
 import ru.otus.jdbc.mapper.*;
 
 import javax.sql.DataSource;
+import java.util.List;
 
 public class HomeWork {
     private static final String URL = "jdbc:postgresql://localhost:5430/demoDB";
@@ -29,9 +30,10 @@ public class HomeWork {
         var dbExecutor = new DbExecutorImpl();
 
 // Работа с клиентом
-        EntityClassMetaData<Client> entityClassMetaDataClient = new EntityClassMetaDataImpl<>();
+        EntityClassMetaData<Client> entityClassMetaDataClient = new EntityClassMetaDataImpl<>(Client.class);
         EntitySQLMetaData entitySQLMetaDataClient = new EntitySQLMetaDataImpl(entityClassMetaDataClient);
-        var dataTemplateClient = new DataTemplateJdbc<Client>(dbExecutor, entitySQLMetaDataClient); //реализация DataTemplate, универсальная
+        var dataTemplateClient = new DataTemplateJdbc<>(dbExecutor, entitySQLMetaDataClient,
+                entityClassMetaDataClient); //реализация DataTemplate, универсальная
 
 // Код дальше должен остаться
         var dbServiceClient = new DbServiceClientImpl(transactionRunner, dataTemplateClient);
@@ -42,11 +44,19 @@ public class HomeWork {
                 .orElseThrow(() -> new RuntimeException("Client not found, id:" + clientSecond.getId()));
         log.info("clientSecondSelected:{}", clientSecondSelected);
 
+        clientSecondSelected.setName(clientSecondSelected.getName() + "_");
+        clientSecondSelected = dbServiceClient.saveClient(clientSecondSelected);
+        log.info("clientSecondSelected:{}", clientSecondSelected);
+
+        List<Client> clients = dbServiceClient.findAll();
+        log.info("client count: {}", clients.size());
+
 // Сделайте тоже самое с классом Manager (для него надо сделать свою таблицу)
 
-        EntityClassMetaData<Manager> entityClassMetaDataManager = new EntityClassMetaDataImpl<>();
+        EntityClassMetaData<Manager> entityClassMetaDataManager = new EntityClassMetaDataImpl<>(Manager.class);
         EntitySQLMetaData entitySQLMetaDataManager = new EntitySQLMetaDataImpl(entityClassMetaDataManager);
-        var dataTemplateManager = new DataTemplateJdbc<Manager>(dbExecutor, entitySQLMetaDataManager);
+        var dataTemplateManager = new DataTemplateJdbc<>(dbExecutor, entitySQLMetaDataManager,
+                entityClassMetaDataManager);
 
         var dbServiceManager = new DbServiceManagerImpl(transactionRunner, dataTemplateManager);
         dbServiceManager.saveManager(new Manager("ManagerFirst"));
@@ -55,6 +65,13 @@ public class HomeWork {
         var managerSecondSelected = dbServiceManager.getManager(managerSecond.getNo())
                 .orElseThrow(() -> new RuntimeException("Manager not found, id:" + managerSecond.getNo()));
         log.info("managerSecondSelected:{}", managerSecondSelected);
+
+        managerSecondSelected.setLabel(managerSecondSelected.getLabel() + "_");
+        managerSecondSelected = dbServiceManager.saveManager(managerSecondSelected);
+        log.info("managerSecondSelected:{}", managerSecondSelected);
+
+        List<Manager> managers = dbServiceManager.findAll();
+        log.info("manager count: {}", managers.size());
     }
 
     private static void flywayMigrations(DataSource dataSource) {

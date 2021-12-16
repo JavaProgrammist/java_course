@@ -18,21 +18,18 @@ public class EntityClassMetaDataImpl<T> implements EntityClassMetaData<T> {
     private final List<Field> allClassFields;
     private final List<Field> classFieldsWithoutId;
 
-    @SuppressWarnings(value = "unchecked")
-    public EntityClassMetaDataImpl() {
-        clazz = (Class<T>)
-                ((ParameterizedType) getClass().getGenericSuperclass())
-                        .getActualTypeArguments()[0];
-        className = clazz.getName();
+    public EntityClassMetaDataImpl(Class<T> clazz) {
+        this.clazz = clazz;
+        className = clazz.getSimpleName();
         try {
             classConstructor = clazz.getConstructor();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        classIdField = Arrays.stream(clazz.getFields())
+        classIdField = Arrays.stream(clazz.getDeclaredFields())
                 .filter(item -> item.isAnnotationPresent(Id.class)).findFirst()
                 .orElseThrow(() -> new RuntimeException("Не найдено поле с аннотацией id"));
-        allClassFields = Arrays.asList(clazz.getFields());
+        allClassFields = Arrays.asList(clazz.getDeclaredFields());
         classFieldsWithoutId = allClassFields.stream()
                 .filter(item -> !item.getName().equals(classIdField.getName()))
                 .collect(Collectors.toList());

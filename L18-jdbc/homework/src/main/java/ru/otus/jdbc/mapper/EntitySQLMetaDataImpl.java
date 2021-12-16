@@ -32,9 +32,9 @@ public class EntitySQLMetaDataImpl implements EntitySQLMetaData {
 
     @Override
     public String getUpdateSql() {
-        List<Field> allFields = entityClassMetaData.getAllFields();
+        List<Field> fieldsWithoutId = entityClassMetaData.getFieldsWithoutId();
         return String.format("update %s set %s where %s=?", entityClassMetaData.getName(),
-                joinFieldNamesWithQuestionMarks(allFields), entityClassMetaData.getIdField().getName());
+                joinFieldNamesWithQuestionMarks(fieldsWithoutId), entityClassMetaData.getIdField().getName());
     }
 
     private String joinFieldNames(List<Field> fields) {
@@ -43,6 +43,9 @@ public class EntitySQLMetaDataImpl implements EntitySQLMetaData {
     }
 
     private String joinFieldNamesWithQuestionMarks(List<Field> fields) {
+        if (fields.size() == 1) {
+            return fields.get(0).getName() + "=?";
+        }
         return fields.stream().map(Field::getName).reduce((item1, item2) -> item1 + "=?, " + item2 + "=?")
                 .orElseThrow(() -> new RuntimeException("Поля не найдены"));
     }
