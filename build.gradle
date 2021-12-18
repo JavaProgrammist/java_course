@@ -32,6 +32,9 @@ allprojects {
             dependency("com.google.guava:guava:${Versions.guava}")
             dependency("com.google.code.gson:gson:${Versions.gson}")
             dependency("org.projectlombok:lombok:${Versions.lombok}")
+            dependency("org.testcontainers:junit-jupiter:${Versions.testcontainers}")
+            dependency("org.testcontainers:postgresql:${Versions.testcontainers}")
+            dependency("org.apache.commons:commons-lang3:${Versions.commonslang}")
         }
     }
 }
