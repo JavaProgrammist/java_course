@@ -26,7 +26,7 @@ class DataTemplateHibernateTest extends AbstractHibernateTest {
         assertThat(savedClient.getName()).isEqualTo(client.getName());
 
         //when
-        var loadedSavedClient = transactionManager.doInTransaction(session ->
+        var loadedSavedClient = transactionManager.doInReadOnlyTransaction(session ->
                 clientTemplate.findById(session, savedClient.getId())
         );
 
@@ -42,13 +42,13 @@ class DataTemplateHibernateTest extends AbstractHibernateTest {
         });
 
         //then
-        var loadedClient = transactionManager.doInTransaction(session ->
+        var loadedClient = transactionManager.doInReadOnlyTransaction(session ->
                 clientTemplate.findById(session, updatedClient.getId())
         );
         assertThat(loadedClient).isPresent().get().isEqualToComparingFieldByField(updatedClient);
 
         //when
-        var clientList = transactionManager.doInTransaction(session ->
+        var clientList = transactionManager.doInReadOnlyTransaction(session ->
                 clientTemplate.findAll(session)
         );
 

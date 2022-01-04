@@ -37,8 +37,9 @@ public class DbServiceClientImpl implements DBServiceClient {
 
     @Override
     public Optional<Client> getClient(long id) {
-        return transactionManager.doInTransaction(session -> {
+        return transactionManager.doInReadOnlyTransaction(session -> {
             var clientOptional = clientDataTemplate.findById(session, id);
+            clientOptional.ifPresent(client -> client.setName(client.getName() + "_"));
             log.info("client: {}", clientOptional);
             return clientOptional;
         });
@@ -46,7 +47,7 @@ public class DbServiceClientImpl implements DBServiceClient {
 
     @Override
     public List<Client> findAll() {
-        return transactionManager.doInTransaction(session -> {
+        return transactionManager.doInReadOnlyTransaction(session -> {
             var clientList = clientDataTemplate.findAll(session);
             log.info("clientList:{}", clientList);
             return clientList;
