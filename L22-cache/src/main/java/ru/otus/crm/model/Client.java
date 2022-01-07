@@ -1,10 +1,16 @@
 package ru.otus.crm.model;
 
 
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+
 import javax.persistence.*;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
-@Table(name = "client")
+@Table(name = "client", schema = "public")
 public class Client implements Cloneable {
 
     @Id
@@ -14,6 +20,14 @@ public class Client implements Cloneable {
 
     @Column(name = "name")
     private String name;
+
+    @OneToOne(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Address address;
+
+    @Fetch(FetchMode.SUBSELECT)
+    @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true,
+            fetch = FetchType.EAGER)
+    private Set<Phone> phones;
 
     public Client() {
     }
@@ -30,7 +44,16 @@ public class Client implements Cloneable {
 
     @Override
     public Client clone() {
-        return new Client(this.id, this.name);
+        Client clone = new Client(this.id, this.name);
+        if (this.phones != null) {
+            Set<Phone> phones = this.phones.stream().map(item -> new Phone(item, clone))
+                    .collect(Collectors.toSet());
+            clone.setPhones(phones);
+        }
+        if (this.getAddress() != null) {
+            clone.setAddress(new Address(this.getAddress(), clone));
+        }
+        return clone;
     }
 
     public Long getId() {
@@ -47,6 +70,47 @@ public class Client implements Cloneable {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Address getAddress() {
+        return address;
+    }
+
+    public void setAddress(Address address) {
+        address.setClient(this);
+        this.address = address;
+    }
+
+    public void clearAddress() {
+        if (address != null) {
+            address.setClient(null);
+            address = null;
+        }
+    }
+
+    public Set<Phone> getPhones() {
+        if (phones == null) {
+            phones = new HashSet<>();
+        }
+        return phones;
+    }
+
+    public void setPhones(Set<Phone> phones) {
+        this.phones = phones;
+    }
+
+    public void addPhone(Phone phone) {
+        if (this.phones == null) {
+            this.phones = new HashSet<>();
+        }
+        this.phones.add(phone);
+    }
+
+    public void clearPhones() {
+        if (phones != null) {
+            phones.forEach(item -> item.setClient(null));
+            phones.clear();
+        }
     }
 
     @Override

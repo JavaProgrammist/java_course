@@ -48,7 +48,7 @@ public class DbServiceClientImpl implements DBServiceClient {
             log.info("client is in cache");
             return Optional.of(client);
         }
-        return transactionManager.doInTransaction(session -> {
+        return transactionManager.doInReadOnlyTransaction(session -> {
             var clientOptional = clientDataTemplate.findById(session, id);
             clientOptional.ifPresent(value -> cache.put(String.valueOf(id), value));
             log.info("client: {}", clientOptional);
@@ -58,7 +58,7 @@ public class DbServiceClientImpl implements DBServiceClient {
 
     @Override
     public List<Client> findAll() {
-        return transactionManager.doInTransaction(session -> {
+        return transactionManager.doInReadOnlyTransaction(session -> {
             var clientList = clientDataTemplate.findAll(session);
             log.info("clientList:{}", clientList);
             return clientList;
