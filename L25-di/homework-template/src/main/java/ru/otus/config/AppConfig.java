@@ -12,7 +12,7 @@ public class AppConfig {
 
     @AppComponent(order = 0, name = "equationPreparer")
     public EquationPreparer equationPreparer(){
-        return new EquationPreparerImpl();
+        return new EquationPreparerImpl(1);
     }
 
     @AppComponent(order = 1, name = "playerService")

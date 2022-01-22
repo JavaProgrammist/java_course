@@ -3,6 +3,7 @@ package ru.otus.appcontainer;
 import ru.otus.appcontainer.api.AppComponent;
 import ru.otus.appcontainer.api.AppComponentsContainer;
 import ru.otus.appcontainer.api.AppComponentsContainerConfig;
+import ru.otus.exception.AppComponentsContainerException;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
@@ -15,9 +16,12 @@ public class AppComponentsContainerImpl implements AppComponentsContainer {
     private final List<Object> appComponents = new ArrayList<>();
     private final Map<String, Object> appComponentsByName = new HashMap<>();
 
-    public AppComponentsContainerImpl(Class<?> initialConfigClass) throws
-            InvocationTargetException, IllegalAccessException, NoSuchMethodException, InstantiationException {
-        processConfig(initialConfigClass);
+    public AppComponentsContainerImpl(Class<?> initialConfigClass) throws AppComponentsContainerException {
+        try {
+            processConfig(initialConfigClass);
+        } catch (Exception e) {
+            throw new AppComponentsContainerException(e);
+        }
     }
 
     @Override
@@ -34,17 +38,24 @@ public class AppComponentsContainerImpl implements AppComponentsContainer {
         return (C) component;
     }
 
-    private void processConfig(Class<?> configClass)
-            throws IllegalAccessException, NoSuchMethodException, InvocationTargetException,
-            InstantiationException {
-        checkConfigClass(configClass);
+    private void processConfig(Class<?> configClass) throws AppComponentsContainerException {
+        try {
+            checkConfigClass(configClass);
 
-        List<AppComponentMethodInfo> compMethodInfoList = getAppComponentMethodInfoList(configClass);
-        Object configObject = configClass.getConstructor().newInstance();
-        for (AppComponentMethodInfo compMethodInfo : compMethodInfoList) {
-            Object component = invokeComponentMethod(configObject, compMethodInfo.getMethod());
-            appComponents.add(component);
-            appComponentsByName.put(compMethodInfo.getName(), component);
+            List<AppComponentMethodInfo> compMethodInfoList = getAppComponentMethodInfoList(configClass);
+            Object configObject = configClass.getConstructor().newInstance();
+            for (AppComponentMethodInfo compMethodInfo : compMethodInfoList) {
+                if (compMethodInfoList.stream()
+                        .anyMatch(item -> item.name.equals(compMethodInfo.getName()) && item != compMethodInfo)) {
+                    throw new AppComponentsContainerException(String.format(
+                            "Было найдено по названию %s больше одного компонента", compMethodInfo.getName()));
+                }
+                Object component = invokeComponentMethod(configObject, compMethodInfo.getMethod());
+                appComponents.add(component);
+                appComponentsByName.put(compMethodInfo.getName(), component);
+            }
+        } catch (Exception e) {
+            throw new AppComponentsContainerException(e);
         }
     }
 
@@ -54,33 +65,25 @@ public class AppComponentsContainerImpl implements AppComponentsContainer {
         }
     }
 
-    private List<AppComponentMethodInfo> getAppComponentMethodInfoList(Class<?> configClass)
-            throws IllegalAccessException, NoSuchMethodException, InvocationTargetException {
-        List<AppComponentMethodInfo> methodInfoList = new ArrayList<>();
-        for (Method method : configClass.getMethods()) {
-            if (method.isAnnotationPresent(AppComponent.class)) {
-                Annotation appComponentAnnotation = method.getAnnotation(AppComponent.class);
-                Method orderMethod = appComponentAnnotation.annotationType().getMethod("order");
-                Integer order = (Integer) orderMethod.invoke(appComponentAnnotation);
-
-                Method componentNameMethod = appComponentAnnotation.annotationType().getMethod("name");
-                String componentName = (String) componentNameMethod.invoke(appComponentAnnotation);
-
-                AppComponentMethodInfo methodInfo = new AppComponentMethodInfo(method, order, componentName);
-                methodInfoList.add(methodInfo);
-            }
-        }
-        return methodInfoList.stream().sorted(Comparator.comparing(AppComponentMethodInfo::getOrder))
+    private List<AppComponentMethodInfo> getAppComponentMethodInfoList(Class<?> configClass) {
+        return Arrays.stream(configClass.getMethods())
+                .filter(m -> m.isAnnotationPresent(AppComponent.class))
+                .sorted(Comparator.comparingInt(m -> m.getAnnotation(AppComponent.class).order()))
+                .map(m -> new AppComponentMethodInfo(m, m.getAnnotation(AppComponent.class).order(),
+                        m.getAnnotation(AppComponent.class).name()))
                 .collect(Collectors.toList());
     }
 
-    private Object invokeComponentMethod(Object configObject, Method method)
-            throws InvocationTargetException, IllegalAccessException {
-        List<Object> methodArguments = new ArrayList<>();
-        for (Class<?> paramType : method.getParameterTypes()) {
-            methodArguments.add(getAppComponentByType(paramType));
+    private Object invokeComponentMethod(Object configObject, Method method) {
+        try {
+            List<Object> methodArguments = new ArrayList<>();
+            for (Class<?> paramType : method.getParameterTypes()) {
+                methodArguments.add(getAppComponentByType(paramType));
+            }
+            return method.invoke(configObject, methodArguments.toArray());
+        } catch (Exception e) {
+            throw new AppComponentsContainerException(e);
         }
-        return method.invoke(configObject, methodArguments.toArray());
     }
 
     private <C> C getAppComponentByType(Class<C> componentClass) {
@@ -88,19 +91,20 @@ public class AppComponentsContainerImpl implements AppComponentsContainer {
                 .filter(item -> componentClass.isAssignableFrom(item.getClass()))
                 .collect(Collectors.toList());
         if (suitableComponents.size() == 0) {
-            throw new RuntimeException(String.format("Не найден компонент по типу %s", componentClass.getName()));
-        } else if (suitableComponents.size() > 2) {
-            throw new RuntimeException(String.format("Было найдено по типу %s больше одного компонента",
+            throw new AppComponentsContainerException(String.format("Не найден компонент по типу %s",
                     componentClass.getName()));
+        } else if (suitableComponents.size() > 1) {
+            throw new AppComponentsContainerException(String.format(
+                    "Было найдено по типу %s больше одного компонента", componentClass.getName()));
         }
         return (C) suitableComponents.get(0);
 
     }
 
-    private class AppComponentMethodInfo {
-        private Method method;
-        private int order;
-        private String name;
+    private static class AppComponentMethodInfo {
+        private final Method method;
+        private final int order;
+        private final String name;
 
         public AppComponentMethodInfo(Method method, int order, String name) {
             this.method = method;

@@ -13,7 +13,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class AppTest {
 
-    @Disabled //надо удалить
     @DisplayName("Из контекста тремя способами должен корректно доставаться компонент с проставленными полями")
     @ParameterizedTest(name = "Достаем по: {0}")
     @CsvSource(value = {"GameProcessor, ru.otus.services.GameProcessor",
@@ -38,10 +37,10 @@ class AppTest {
         assertThat(classNameOrBeanId).isNotEmpty();
         Object component;
         if (classNameOrBeanId.charAt(0) == classNameOrBeanId.toUpperCase().charAt(0)) {
-            Class<?> gameProcessorClass = Class.forName("ru.otus.services." + classNameOrBeanId);
-            assertThat(rootClass).isAssignableFrom(gameProcessorClass);
+            Class<?> clazz = Class.forName("ru.otus.services." + classNameOrBeanId);
+            assertThat(rootClass).isAssignableFrom(clazz);
 
-            component = ctx.getAppComponent(gameProcessorClass);
+            component = ctx.getAppComponent(clazz);
         } else {
             component = ctx.getAppComponent(classNameOrBeanId);
         }

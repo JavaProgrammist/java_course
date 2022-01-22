@@ -9,6 +9,13 @@ import java.util.Collections;
 import java.util.List;
 
 public class EquationPreparerImpl implements EquationPreparer {
+
+    private int number;
+
+    public EquationPreparerImpl(int number) {
+        this.number = number;
+    }
+
     @Override
     public List<Equation> prepareEquationsFor(int base) {
         List<Equation> equations = new ArrayList<>();
