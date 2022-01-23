@@ -1,11 +1,8 @@
 package ru.otus;
 
-import lombok.Data;
-
 /**
  * Банкноты одного номинала.
  */
-@Data
 public class OneTypeBankNotes {
 
     /**

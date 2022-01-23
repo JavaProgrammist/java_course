@@ -1,8 +1,5 @@
 package ru.otus;
 
-import lombok.Data;
-import lombok.Setter;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -10,7 +7,6 @@ import java.util.Optional;
 /**
  * Банкноты.
  */
-@Data
 public class BankNotes {
 
     /**
@@ -21,7 +17,6 @@ public class BankNotes {
     /**
      * Другие банкноты любых номиналов.
      */
-    @Setter
     private BankNotes otherBankNotes;
 
     public BankNotes(OneTypeBankNotes oneTypeBankNotes) {
@@ -30,6 +25,22 @@ public class BankNotes {
 
     public BankNotes(OneTypeBankNotes oneTypeBankNotes, BankNotes otherBankNotes) {
         this.oneTypeBankNotes = oneTypeBankNotes;
+        this.otherBankNotes = otherBankNotes;
+    }
+
+    public OneTypeBankNotes getOneTypeBankNotes() {
+        return oneTypeBankNotes;
+    }
+
+    public void setOneTypeBankNotes(OneTypeBankNotes oneTypeBankNotes) {
+        this.oneTypeBankNotes = oneTypeBankNotes;
+    }
+
+    public BankNotes getOtherBankNotes() {
+        return otherBankNotes;
+    }
+
+    public void setOtherBankNotes(BankNotes otherBankNotes) {
         this.otherBankNotes = otherBankNotes;
     }
 

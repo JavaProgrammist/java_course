@@ -1,7 +1,5 @@
 package ru.otus;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 
 /**
  * Номинал банкнот.
