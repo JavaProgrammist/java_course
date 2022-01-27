@@ -1,6 +1,10 @@
+
 plugins {
     id 'java'
 }
+
+targetCompatibility = JavaVersion.VERSION_16
+sourceCompatibility = JavaVersion.VERSION_16
 
 group 'ru.otus'
 version 'unspecified'
