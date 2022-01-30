@@ -20,6 +20,7 @@ allprojects {
     group "ru.otus"
 
     repositories {
+        mavenLocal()
         mavenCentral()
     }
 
@@ -35,6 +36,10 @@ allprojects {
             dependency("org.testcontainers:junit-jupiter:${Versions.testcontainers}")
             dependency("org.testcontainers:postgresql:${Versions.testcontainers}")
             dependency("org.apache.commons:commons-lang3:${Versions.commonslang}")
+            dependency("org.webjars:sockjs-client:${Versions.sockjs}")
+            dependency("org.webjars:stomp-websocket:${Versions.stomp}")
+            dependency("org.webjars:bootstrap:${Versions.bootstrap}")
+            dependency("io.springfox:springfox-boot-starter:${Versions.swagger}")
         }
     }
 
