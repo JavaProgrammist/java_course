@@ -8,33 +8,41 @@ import ru.otus.model.Phone;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class ClientResultSetExtractor implements ResultSetExtractor<List<Client>> {
     @Override
     public List<Client> extractData(ResultSet rs) throws SQLException, DataAccessException {
-        var clientList = new ArrayList<Client>();
-        Client prevClient = null;
+        Map<Long, Client> clientMap = new HashMap<>();
         while (rs.next()) {
             var clientId = rs.getLong("client_id");
-            Client client = null;
-            if (prevClient == null || !prevClient.getId().equals(clientId)) {
+            Client client = clientMap.get(clientId);
+            if (client == null) {
                 client = new Client(clientId, rs.getString("client_name"));
-                clientList.add(client);
-                prevClient = client;
+                clientMap.put(clientId, client);
             }
-            Long addressId = (Long) rs.getObject("address_id");
-            if (client != null && addressId != null) {
-                Address address = new Address(addressId, rs.getString("address_street"), clientId);
-                client.setAddress(address);
-            }
-            Long phoneId = (Long) rs.getObject("phone_id");
-            if (phoneId != null) {
-                Phone phone = new Phone(phoneId, rs.getString("phone_number"), clientId);
-                prevClient.getPhones().add(phone);
-            }
+            addAddressData(client, rs);
+            addPhoneData(client, rs);
         }
-        return clientList;
+        return clientMap.values().stream()
+                .sorted(Comparator.comparing(Client::getName))
+                .collect(Collectors.toList());
+    }
+
+    private void addAddressData(Client client, ResultSet rs) throws SQLException {
+        Long addressId = (Long) rs.getObject("address_id");
+        if (addressId != null) {
+            Address address = new Address(addressId, rs.getString("address_street"), client.getId());
+            client.setAddress(address);
+        }
+    }
+
+    private void addPhoneData(Client client, ResultSet rs) throws SQLException {
+        Long phoneId = (Long) rs.getObject("phone_id");
+        if (phoneId != null) {
+            Phone phone = new Phone(phoneId, rs.getString("phone_number"), client.getId());
+            client.getPhones().add(phone);
+        }
     }
 }
