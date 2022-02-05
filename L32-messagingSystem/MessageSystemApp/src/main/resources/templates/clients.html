@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Клиенты</title>
+    <script src="/webjars/jquery/jquery.min.js"></script>
+    <script src="/webjars/sockjs-client/sockjs.min.js"></script>
+    <script src="/webjars/stomp-websocket/stomp.min.js"></script>
+    <script src="/app.js"></script>
+</head>
+
+<body>
+
+<label for="connect">Соединение по WebSocket:</label>
+<button id="connect" type="submit">Соединить</button>&nbsp;&nbsp;
+<button id="disconnect" type="submit" disabled="disabled">Отсоединить</button>
+<br>
+<h4>Добавить клиента</h4>
+<table>
+    <tr>
+        <td><label for="clientNameTextBox">Имя клиента:</label></td>
+        <td><input type="text" id="clientNameTextBox" value="Клиент"></td>
+    </tr>
+    <tr>
+        <td><label for="clientStreetTextBox">Улица:</label></td>
+        <td><input type="text" id="clientStreetTextBox" value="Улица"></td>
+    </tr>
+    <tr>
+        <td><label for="clientPhonesTextArea">Телефоны:</label></td>
+        <td><textarea id="clientPhonesTextArea" rows="5" cols="30"></textarea></td>
+    </tr>
+    <tr>
+        <td colspan="2">
+            <button id="addClient" disabled="disabled">Добавить</button>
+        </td>
+    </tr>
+</table>
+<br>
+<pre id="clientDataContainer"></pre>
+
+<h4>Клиенты</h4>
+<table border="1" style="width: 400px" id="clientTable">
+    <thead>
+    <tr>
+        <th style="width: 50px">Id</th>
+        <th style="width: 150px">Имя</th>
+        <th style="width: 150px">Улица</th>
+        <th style="width: 150px">Телефоны</th>
+    </tr>
+    </thead>
+    <tbody id="clientTableBody">
+    </tbody>
+</table>
+</body>
+</html>
